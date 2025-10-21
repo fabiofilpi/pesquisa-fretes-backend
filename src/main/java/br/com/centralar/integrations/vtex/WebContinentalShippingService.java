@@ -1,4 +1,4 @@
-package br.com.centralar.vtex;
+package br.com.centralar.integrations.vtex;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

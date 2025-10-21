@@ -5,7 +5,7 @@ import br.com.centralar.entities.LojaPesquisadaModel;
 import br.com.centralar.enums.ResultadoCotacao;
 import br.com.centralar.enums.Vendor;
 import br.com.centralar.utils.PesquisaFretesUtils;
-import br.com.centralar.vtex.StrArShippingService;
+import br.com.centralar.integrations.vtex.StrArShippingService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.ArrayList;

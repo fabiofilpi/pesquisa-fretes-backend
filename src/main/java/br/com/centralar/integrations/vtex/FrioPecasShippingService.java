@@ -1,4 +1,4 @@
-package br.com.centralar.vtex;
+package br.com.centralar.integrations.vtex;
 
 import br.com.centralar.dtos.ShippingOptionDTO;
 import io.vertx.core.json.JsonArray;

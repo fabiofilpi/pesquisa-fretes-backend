@@ -1,4 +1,4 @@
-package br.com.centralar.vtex;
+package br.com.centralar.integrations.vtex;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -13,28 +13,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
-public class PoloArShippingService {
+public class StrArShippingService {
 
-  private static final String BASE_URL = "https://www.poloar.com.br/api/graphql";
-  // do seu cURL
-  private static final String OPERATION_HASH = "d6667f1de2a26b94b9b55f4b25d7d823f82635a0";
+  private static final String BASE_URL = "https://www.strar.com.br/api/graphql";
+  private static final String OPERATION_NAME = "ClientShippingSimulationQuery";
+  private static final String OPERATION_HASH = "c35bad22f67f3eb34fea52bb49efa6b1da6b728d";
 
   private final HttpClient http = HttpClient.newHttpClient();
 
   /**
-   * Faz a cotação na Polo Ar.
+   * Simula frete na Strar.
    *
    * @param country ex.: "BRA"
    * @param postalCode ex.: "13087-500"
-   * @param skuId ex.: "1263"
+   * @param skuId ex.: "23"
    * @param seller ex.: "1"
    * @param quantity ex.: 1
    */
   public ShippingResult cotarFrete(
       String country, String postalCode, String skuId, String seller, int quantity) {
     try {
-      // 1) variables = JSON (SEM base64; esse endpoint usa JSON url-encodado)
-      // No exemplo, quantity é número; id/seller são strings.
+      // 1) variables = JSON (SEM base64; aqui é JSON url-encodado)
       var variables =
           new JsonObject()
               .put(
@@ -42,8 +41,8 @@ public class PoloArShippingService {
                   new JsonArray()
                       .add(
                           new JsonObject()
-                              .put("id", skuId)
-                              .put("quantity", quantity)
+                              .put("id", skuId) // id/seller como string (conforme exemplo)
+                              .put("quantity", quantity) // quantity numérico
                               .put("seller", seller)))
               .put("postalCode", postalCode)
               .put("country", country);
@@ -51,28 +50,32 @@ public class PoloArShippingService {
       // 2) URL-encode do JSON
       String variablesEncoded = URLEncoder.encode(variables.encode(), StandardCharsets.UTF_8);
 
-      // Se notar que o servidor exige **duplo encode** (ex: aparece %257B no cURL),
-      // descomente a linha abaixo:
+      // Se o servidor exigir **duplo encode** (curl mostra %257B...), habilite:
       // variablesEncoded = URLEncoder.encode(variablesEncoded, StandardCharsets.UTF_8);
 
-      // 3) Monta a URI final
+      // 3) Montar URI final com operationName + operationHash + variables
       var uri =
           URI.create(
-              BASE_URL + "?operationHash=" + OPERATION_HASH + "&variables=" + variablesEncoded);
+              BASE_URL
+                  + "?operationName="
+                  + OPERATION_NAME
+                  + "&operationHash="
+                  + OPERATION_HASH
+                  + "&variables="
+                  + variablesEncoded);
 
       var req = HttpRequest.newBuilder(uri).GET().header("Accept", "application/json").build();
 
       var resp = http.send(req, HttpResponse.BodyHandlers.ofString());
       if (resp.statusCode() / 100 != 2) {
         throw new IllegalStateException(
-            "HTTP " + resp.statusCode() + " ao chamar PoloAr: " + resp.body());
+            "HTTP " + resp.statusCode() + " ao chamar Strar: " + resp.body());
       }
 
       // 4) Parse do JSON
       var root = new JsonObject(resp.body());
       var shipping = root.getJsonObject("data").getJsonObject("shipping");
 
-      // address
       var addrJson = shipping.getJsonObject("address");
       var address =
           new AddressDTO(
@@ -80,7 +83,6 @@ public class PoloArShippingService {
               addrJson.getString("neighborhood"),
               addrJson.getString("state"));
 
-      // opções (slas)
       var logisticsInfo = shipping.getJsonArray("logisticsInfo");
       List<ShippingOptionDTO> options = new ArrayList<>();
       if (logisticsInfo != null && !logisticsInfo.isEmpty()) {
@@ -90,11 +92,11 @@ public class PoloArShippingService {
             var sla = slas.getJsonObject(i);
             options.add(
                 new ShippingOptionDTO(
-                    sla.getString("carrier"), // "Entrega"
-                    sla.getLong("price"), // 0
-                    sla.getString("shippingEstimate"), // "12bd"
-                    sla.getString("localizedEstimates") // "Up to 12 business days"
-                    ));
+                    sla.getString("carrier"),
+                    sla.getString("deliveryChannel"),
+                    sla.getLong("price"),
+                    sla.getString("shippingEstimate"),
+                    sla.getString("localizedEstimates")));
           }
         }
       }
@@ -102,15 +104,16 @@ public class PoloArShippingService {
       return new ShippingResult(address, options);
 
     } catch (Exception e) {
-      throw new RuntimeException("Falha ao consultar frete (PoloAr)", e);
+      throw new RuntimeException("Falha ao consultar frete (Strar)", e);
     }
   }
 
   public record ShippingOptionDTO(
-      String carrier,
-      long priceInCents,
-      String estimate, // ex.: "12bd"
-      String localizedEstimates // ex.: "Up to 12 business days"
+      String carrier, // "Entrega"
+      String deliveryChannel, // "delivery"
+      long priceInCents, // 0
+      String estimate, // "4bd"
+      String localizedEstimates // "Up to 4 business days"
       ) {}
 
   public record AddressDTO(String city, String neighborhood, String state) {}
