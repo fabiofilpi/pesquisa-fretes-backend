@@ -1,19 +1,24 @@
 package br.com.centralar.strategies.impl;
 
+import br.com.centralar.constants.PesquisaFretesConstants;
 import br.com.centralar.dtos.ShippingOptionDTO;
 import br.com.centralar.entities.CotacaoDeFreteModel;
 import br.com.centralar.entities.LojaPesquisadaModel;
 import br.com.centralar.enums.ResultadoCotacao;
 import br.com.centralar.enums.Vendor;
-import br.com.centralar.utils.PesquisaFretesUtils;
 import br.com.centralar.integrations.vtex.ClimaRioShippingService;
+import br.com.centralar.utils.PesquisaFretesUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ApplicationScoped
 public class ClimaRioStrategy extends BaseStrategy {
+  private static final String SELLER_ID = "1";
+
   @Inject ClimaRioShippingService climarioShippingService;
 
   @Override
@@ -22,9 +27,19 @@ public class ClimaRioStrategy extends BaseStrategy {
   }
 
   @Override
+  void validateParameters(String sku) throws IllegalArgumentException {
+    final var resposta =
+        climarioShippingService.cotarFrete(
+            PesquisaFretesConstants.BRA, PesquisaFretesConstants.CEP_DE_EXEMPLO, sku, SELLER_ID, 1);
+    log.info(resposta.toString());
+  }
+
+  @Override
   List<CotacaoDeFreteModel> getCotacaoDeFrete(
       final String cep, final LojaPesquisadaModel lojaPesquisadaModel) {
-    final var resposta = climarioShippingService.cotarFrete("BRA", "13087-500", "31809", "1", 1);
+    final var resposta =
+        climarioShippingService.cotarFrete(
+            PesquisaFretesConstants.BRA, cep, lojaPesquisadaModel.getSku(), SELLER_ID, 1);
     final var lista = new ArrayList<CotacaoDeFreteModel>();
     for (final ShippingOptionDTO i : resposta) {
       final var sku = lojaPesquisadaModel.getSku();

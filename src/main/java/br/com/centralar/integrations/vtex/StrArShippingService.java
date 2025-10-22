@@ -11,7 +11,10 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ApplicationScoped
 public class StrArShippingService {
 
@@ -104,6 +107,7 @@ public class StrArShippingService {
       return new ShippingResult(address, options);
 
     } catch (Exception e) {
+      log.error(e.getMessage(), e);
       throw new RuntimeException("Falha ao consultar frete (Strar)", e);
     }
   }
@@ -118,6 +122,7 @@ public class StrArShippingService {
 
   public record AddressDTO(String city, String neighborhood, String state) {}
 
+  @Getter
   public static final class ShippingResult {
     public final AddressDTO address;
     public final List<ShippingOptionDTO> options;

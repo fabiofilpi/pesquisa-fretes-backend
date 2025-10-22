@@ -9,11 +9,16 @@ import java.util.List;
 @ApplicationScoped
 public class FrigelArStrategy extends BaseStrategy {
   @Override
+  void validateParameters(String sku) throws IllegalArgumentException {}
+
+  @Override
   public Vendor getVendor() {
     return Vendor.FRIGELAR;
   }
-    @Override
-    List<CotacaoDeFreteModel> getCotacaoDeFrete(final String cep, final LojaPesquisadaModel lojaPesquisadaModel) {
-        return List.of();
-    }
+
+  @Override
+  List<CotacaoDeFreteModel> getCotacaoDeFrete(
+      final String cep, final LojaPesquisadaModel lojaPesquisadaModel) {
+    return List.of();
+  }
 }

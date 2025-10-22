@@ -13,7 +13,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ApplicationScoped
 public class ClimaRioShippingService {
 
@@ -107,6 +109,7 @@ public class ClimaRioShippingService {
       return out;
 
     } catch (Exception e) {
+      log.error(e.getMessage(), e);
       throw new RuntimeException("Falha ao consultar frete (VTEX/Climario)", e);
     }
   }

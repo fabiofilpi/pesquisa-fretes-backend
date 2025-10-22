@@ -4,7 +4,6 @@ import br.com.centralar.entities.CotacaoDeFreteModel;
 import br.com.centralar.entities.LojaPesquisadaModel;
 import br.com.centralar.enums.Vendor;
 import jakarta.enterprise.context.ApplicationScoped;
-
 import java.util.List;
 
 @ApplicationScoped
@@ -13,6 +12,9 @@ public class AdiasStrategy extends BaseStrategy {
   public Vendor getVendor() {
     return Vendor.ADIAS;
   }
+
+  @Override
+  void validateParameters(String sku) throws IllegalArgumentException {}
 
   @Override
   List<CotacaoDeFreteModel> getCotacaoDeFrete(
