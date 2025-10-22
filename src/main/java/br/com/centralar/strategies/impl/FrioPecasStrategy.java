@@ -10,10 +10,9 @@ import br.com.centralar.integrations.vtex.FrioPecasShippingService;
 import br.com.centralar.utils.PesquisaFretesUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -28,6 +27,9 @@ public class FrioPecasStrategy extends BaseStrategy {
     final var resposta =
         friopecasShippingService.cotarFrete(
             PesquisaFretesConstants.BRA, PesquisaFretesConstants.CEP_DE_EXEMPLO, sku, SELLER_ID, 1);
+    if (resposta == null || resposta.isEmpty()) {
+      throw new IllegalArgumentException("Resposta Invalida da FrioPecas - Confira SKU");
+    }
     log.info(resposta.toString());
   }
 
