@@ -23,7 +23,6 @@ public abstract class BaseStrategy implements PesquisaFretesStrategy {
   abstract void validateParameters(final String sku) throws IllegalArgumentException;
 
   @Override
-  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public List<CotacaoDeFreteModel> cotarFretes(
       final LojaPesquisadaModel lojaPesquisadaModel, final List<String> ceps) {
     final var list = new ArrayList<CotacaoDeFreteModel>();
@@ -51,7 +50,8 @@ public abstract class BaseStrategy implements PesquisaFretesStrategy {
     return list;
   }
 
-  private CotacaoDeFreteModel buildErrorModel(
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
+  CotacaoDeFreteModel buildErrorModel(
       final LojaPesquisadaModel lojaPesquisadaModel, final String cep, final String message) {
     final CotacaoDeFreteModel error =
         CotacaoDeFreteModel.builder()

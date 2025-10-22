@@ -11,6 +11,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -33,6 +35,7 @@ public class PoloArStrategy extends BaseStrategy {
   }
 
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   List<CotacaoDeFreteModel> getCotacaoDeFrete(
       final String cep, final LojaPesquisadaModel lojaPesquisadaModel) {
     final PoloArShippingService.ShippingResult resposta =
