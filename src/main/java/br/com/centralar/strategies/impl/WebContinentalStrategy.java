@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 public class WebContinentalStrategy extends BaseStrategy {
-  private static final String SELLER_ID = "006176";
+  private static final String SELLER_ID = "1";
   @Inject WebContinentalShippingService webContinentalShippingService;
 
   @Override
@@ -44,6 +44,19 @@ public class WebContinentalStrategy extends BaseStrategy {
         webContinentalShippingService.cotarFrete(
             PesquisaFretesConstants.BRA, cep, lojaPesquisadaModel.getSku(), SELLER_ID, 1);
     final var lista = new ArrayList<CotacaoDeFreteModel>();
+    if (resposta == null || resposta.isEmpty()) {
+      final CotacaoDeFreteModel model =
+          CotacaoDeFreteModel.builder()
+              .skuProduto(lojaPesquisadaModel.getSku())
+              .cep(cep)
+              .resultado(ResultadoCotacao.NAO_ENCONTRADO)
+              .loja(getVendor())
+              .build();
+      model.setLojaPesquisada(lojaPesquisadaModel);
+      cotacaoDeFreteRepository.persist(model);
+      lista.add(model);
+      return lista;
+    }
     for (final WebContinentalShippingService.ShippingOptionDTO i : resposta) {
       final var sku = lojaPesquisadaModel.getSku();
       final var valor = PesquisaFretesUtils.fromCentsToReaisDouble(i.priceInCents());

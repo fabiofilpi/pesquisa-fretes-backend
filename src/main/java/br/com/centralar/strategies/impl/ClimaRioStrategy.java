@@ -46,6 +46,19 @@ public class ClimaRioStrategy extends BaseStrategy {
         climarioShippingService.cotarFrete(
             PesquisaFretesConstants.BRA, cep, lojaPesquisadaModel.getSku(), SELLER_ID, 1);
     final var lista = new ArrayList<CotacaoDeFreteModel>();
+    if (resposta == null || resposta.isEmpty()) {
+      final CotacaoDeFreteModel model =
+          CotacaoDeFreteModel.builder()
+              .skuProduto(lojaPesquisadaModel.getSku())
+              .cep(cep)
+              .resultado(ResultadoCotacao.NAO_ENCONTRADO)
+              .loja(getVendor())
+              .build();
+      model.setLojaPesquisada(lojaPesquisadaModel);
+      cotacaoDeFreteRepository.persist(model);
+      lista.add(model);
+      return lista;
+    }
     for (final ShippingOptionDTO i : resposta) {
       final var sku = lojaPesquisadaModel.getSku();
       final var valor = PesquisaFretesUtils.fromCentsToReaisDouble(i.priceInCents());

@@ -30,7 +30,7 @@ public class CotacaoExportServiceImpl implements CotacaoExportService {
       try (final Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
         // Cabeçalho
         writer.write(
-            "Loja;SKU;CEP;Modo;Prazo Em Dias;Valor;Resultado;Erro;Data ultima alteracao;ID\n");
+            "Loja;SKU;CEP;Modo;Prazo Em Dias Uteis;Valor;Resultado;Erro;Data ultima alteracao\n");
 
         for (final CotacaoDeFreteDto c : cotacoesBemSucedidas) {
           writer.write(toCsvLine(c));
@@ -63,8 +63,7 @@ public class CotacaoExportServiceImpl implements CotacaoExportService {
         safe(c.getValor()),
         safe(resultado),
         safe(c.getMensagemDeErro()),
-        safe(data),
-        safe(c.getId()));
+        safe(data));
   }
 
   private String safe(final Object value) {

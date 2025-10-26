@@ -44,6 +44,19 @@ public class PoloArStrategy extends BaseStrategy {
         poloarShippingService.cotarFrete(
             PesquisaFretesConstants.BRA, cep, lojaPesquisadaModel.getSku(), SELLER_ID, 1);
     final var lista = new ArrayList<CotacaoDeFreteModel>();
+    if (resposta == null || resposta.getOptions() == null || resposta.getOptions().isEmpty()) {
+      final CotacaoDeFreteModel model =
+          CotacaoDeFreteModel.builder()
+              .skuProduto(lojaPesquisadaModel.getSku())
+              .cep(cep)
+              .resultado(ResultadoCotacao.NAO_ENCONTRADO)
+              .loja(getVendor())
+              .build();
+      model.setLojaPesquisada(lojaPesquisadaModel);
+      cotacaoDeFreteRepository.persist(model);
+      lista.add(model);
+      return lista;
+    }
     for (final PoloArShippingService.ShippingOptionDTO i : resposta.getOptions()) {
       final var sku = lojaPesquisadaModel.getSku();
       final var valor = PesquisaFretesUtils.fromCentsToReaisDouble(i.priceInCents());
